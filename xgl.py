@@ -956,7 +956,8 @@ def saveModel(path : Path, model):
 
 class MapViewer:
 
-    def __init__(self, model):
+    def __init__(self, model, debug = False):
+        self.debug = debug
         self.model = model
         self.initialize()
 
@@ -966,8 +967,10 @@ class MapViewer:
         icon = pygame.image.load(Path(__file__).parent / "Resources" / "xenogears logo.png")
 
         pygame.init()
-
-        resolution = {'x':1080, 'y' : 1080}
+        if self.debug:
+            resolution = {'x':1080, 'y' : 1080}
+        else:
+            resolution = {'x':1792, 'y' : 1008}
 
         screen = pygame.display.set_mode((resolution['x'], resolution['y']), HWSURFACE|DOUBLEBUF|OPENGL)
         pygame.display.set_caption("Map Viewer")
@@ -1005,9 +1008,11 @@ class MapViewer:
         self.pos_z = -2000
         self.object = OpenGLObject(self.model)
 
-        
+        self.normal_speed_min = 5
+        self.sprint_speed_min = 15
+
         self.normal_speed = 25
-        self.sprint_speed = 70
+        self.sprint_speed = 75
         self.LOOK_SPEED = 0.2
 
         self.speed = self.normal_speed
@@ -1112,11 +1117,11 @@ class MapViewer:
                 # elif event.key == pygame.K_c:
                 #     saveModel(Path(f"level{fileIndex}.dae"), model)
             elif event.type == MOUSEWHEEL:
-                self.normal_speed += 4 * event.y
-                self.sprint_speed += 4 * event.y
+                self.normal_speed += 3 * event.y
+                self.sprint_speed += 3 * event.y
 
-                self.normal_speed = max(0, self.normal_speed)
-                self.sprint_speed = max(0, self.sprint_speed)
+                self.normal_speed = max(self.normal_speed_min, self.normal_speed)
+                self.sprint_speed = max(self.sprint_speed_min, self.sprint_speed)
                 
 
                  
@@ -1143,7 +1148,7 @@ class MapViewer:
 
 
 def load_level(fileIndex):
-    print("loading archive...")
+    print(f"loading archive {fileIndex}...")
     diskIndex = 1 # there are disk 1 and disk 2
     dirIndex = 11 # 0-based index
 
@@ -1184,5 +1189,5 @@ def load_level(fileIndex):
 
 if __name__ == '__main__':
     model = load_level(1)
-    map_viewer = MapViewer(model)
+    map_viewer = MapViewer(model, debug=True)
     map_viewer.main_loop()

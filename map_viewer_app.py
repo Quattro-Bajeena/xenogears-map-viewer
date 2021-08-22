@@ -10,7 +10,7 @@ icon_file = resource_folder / "xenogears logo.ico"
 
 def lanch_viewer(fileIndex):
     model = load_level(fileIndex)
-    map_viewer = MapViewer(model)
+    map_viewer = MapViewer(model, debug=False)
     map_viewer.main_loop()
 
 sg.theme('DarkBrown4') 
