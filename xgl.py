@@ -1,9 +1,3 @@
-# origin: http://forums.qhimm.com/index.php?topic=8334.0
-# conda create -n xg
-# conda activate xg
-# conda install pip
-# pip install pygame
-# pip install pyopengl
 from io import TextIOWrapper
 import sys, struct, array, math, os
 import os.path
@@ -22,11 +16,7 @@ from pathlib import Path
 
 
 
-def swap_chanles(file):
-    image = Image.open(file).convert("RGBA")
-    r, g, b, a = image.split()
-    swapped = Image.merge('RGBA', (b, g, r, a))
-    swapped.save(file)
+
 
 
 # Check whether f is a prefix of any file in the target directory
@@ -599,6 +589,13 @@ def flattenBuffer(buffer):
         v.extend(x)
     return v
 
+
+def swap_chanles(file):
+    image = Image.open(file).convert("RGBA")
+    r, g, b, a = image.split()
+    swapped = Image.merge('RGBA', (b, g, r, a))
+    swapped.save(file)
+
 def saveModel(path : Path, model):
     basename = path.stem
     print("saving textures...")
@@ -972,7 +969,7 @@ class MapViewer:
         else:
             resolution = {'x':1792, 'y' : 1008}
 
-        screen = pygame.display.set_mode((resolution['x'], resolution['y']), HWSURFACE|DOUBLEBUF|OPENGL)
+        self.screen = pygame.display.set_mode((resolution['x'], resolution['y']), HWSURFACE|DOUBLEBUF|OPENGL)
         pygame.display.set_caption("Map Viewer")
         pygame.display.set_icon(icon)
         pygame.event.set_grab(True)
@@ -982,7 +979,8 @@ class MapViewer:
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         self.kFOVy = 0.57735
-        self.kZNear = 50.0
+        #self.kFOVy = 1
+        self.kZNear = 10.0
         self.kZFar = 50000.0
         self.aspect = (resolution['x'] / resolution['y']) * self.kZNear * self.kFOVy
         glFrustum(-self.aspect, self.aspect, -(self.kZNear * self.kFOVy), (self.kZNear * self.kFOVy), self.kZNear, self.kZFar)
@@ -1141,10 +1139,11 @@ class MapViewer:
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
-        self.object.draw()
 
+        self.object.draw()
         self.clock.tick(60)
         pygame.display.flip()
+
 
 
 def load_level(fileIndex):
@@ -1181,13 +1180,14 @@ def load_level(fileIndex):
     print("converting textures...")
     model["textures"] = loadTextures(textureData, model["shaders"])
 
-    print("getting nodes...")
+    print("getting nodes...") 
     model["nodes"] = getNodes(archiveData)
 
     return model
 
 
 if __name__ == '__main__':
-    model = load_level(1)
-    map_viewer = MapViewer(model, debug=True)
+    fileIndex = 17
+    model = load_level(fileIndex)
+    map_viewer = MapViewer(model, debug=False)
     map_viewer.main_loop()
